@@ -1,9 +1,13 @@
+// src/features/MapView/LayerControls.jsx
+
 import React, { useState } from 'react';
 import { IconButton, Tooltip } from '@mui/material';
 import { Fullscreen, FullscreenExit, Map, Layers, PictureAsPdf } from '@mui/icons-material';
 import { generatePdfUrl, getLayersForPrinting, calculateBoundingBox } from './PdfExport';
+import BaseMapSwitcher from './BaseMapSwitcher'; 
+import LayerTogglePanel from './LayerTogglePanel';
 
-const LayerControls = ({ map }) => {
+const LayerControls = ({ map, baseLayer,layerObjects }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleFullscreen = () => {
@@ -47,17 +51,20 @@ const LayerControls = ({ map }) => {
 
   return (
     <>
-      <Tooltip title="Cambiar mapa base">
-        <IconButton style={controlStyle(10)} color="primary">
-          <Map />
-        </IconButton>
-      </Tooltip>
+      {/* Usa el componente de cambio de mapa base */}
+      <BaseMapSwitcher baseLayer={baseLayer} />
 
-      <Tooltip title="Mostrar/Ocultar capas">
-        <IconButton style={controlStyle(70)} color="primary">
-          <Layers />
-        </IconButton>
-      </Tooltip>
+      <div
+        id="zoom-control"
+        style={{
+          position: 'absolute',
+          bottom: '60px',
+          left: '10px',
+          zIndex: 1000,
+        }}
+      />
+
+      <LayerTogglePanel layerObjects={layerObjects} />
 
       <Tooltip title="Exportar a PDF">
         <IconButton style={controlStyle(130)} color="primary" onClick={handlePdfExport}>
@@ -81,7 +88,7 @@ const controlStyle = (top) => ({
   zIndex: 1000,
   backgroundColor: 'white',
   boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
-  borderRadius: '50%',
+  borderRadius: '50%',  
 });
 
 export default LayerControls;
