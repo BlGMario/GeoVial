@@ -31,8 +31,8 @@ export function getLayersForPrinting(layerName, tipo, codRuta) {
   styles.push('');
   filters.push('INCLUDE');
 
-  if (layerName === 'Jerarquizacion:RVN_ACTUAL_EJES') {
-    layers.push('Jerarquizacion:RVD_ACTUAL_EJES', 'Jerarquizacion:RVN_ACTUAL_PUNTOS');
+  if (layerName === 'Jerarquizacion:DS011_2016_RVN_EJES') {
+    layers.push('Jerarquizacion:DS011_2016_RVD_EJES', 'Jerarquizacion:RVN_ACTUAL_PUNTOS');
     styles.push('', '');
     filters.push('INCLUDE', `cod_ruta='${codRuta}'`);
   }

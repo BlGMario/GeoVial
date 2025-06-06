@@ -8,8 +8,8 @@ const GeoServerApi = import.meta.env.VITE_GEOSERVER_API;
 
 export const searchByCodRuta = async (map, codRuta) => {
   const layerNames = [
-    'Jerarquizacion:RVN_ACTUAL_EJES',
-    'Jerarquizacion:RVD_ACTUAL_EJES',
+    'Jerarquizacion:DS011_2016_RVN_EJES',
+    'Jerarquizacion:DS011_2016_RVD_EJES',
     'Jerarquizacion:DS011_2016_RVV_EJES',
   ];
 

@@ -40,7 +40,7 @@ const LayerControls = ({ map, baseLayer,layerObjects }) => {
     const geometry = feature.getGeometry().getCoordinates();
     const codRuta = feature.get('COD_RUTA') || 'N/A';
     const tipo = feature.get('tipo') || 'N/A';
-    const capa = feature.getId()?.split('.')[0] || 'RVN_ACTUAL_EJES';
+    const capa = feature.getId()?.split('.')[0] || 'DS011_2016_RVN_EJES';
 
     const bbox = calculateBoundingBox(geometry);
     const layerData = getLayersForPrinting(`Jerarquizacion:${capa}`, tipo, codRuta);
