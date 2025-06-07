@@ -22,8 +22,6 @@ const LayerTogglePanel = ({ layerObjects = {} }) => {
   }
 };
 
-
-
   return (
     <Box style={controlStyle(70)}>
       <Tooltip title="Capas">

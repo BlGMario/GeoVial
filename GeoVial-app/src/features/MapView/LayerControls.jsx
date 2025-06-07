@@ -6,8 +6,10 @@ import { Fullscreen, FullscreenExit, Map, Layers, PictureAsPdf } from '@mui/icon
 import { getExportUrlMap } from './GeoFetchDataUtil';
 import BaseMapSwitcher from './BaseMapSwitcher'; 
 import LayerTogglePanel from './LayerTogglePanel';
+import InfoIcon from '@mui/icons-material/Info';
 
-const LayerControls = ({ map, baseLayer, layerObjects, codRutaBuscado }) => {
+
+const LayerControls = ({ map, baseLayer, layerObjects, codRutaBuscado, infoActive, setInfoActive }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleFullscreen = () => {
@@ -62,6 +64,16 @@ const LayerControls = ({ map, baseLayer, layerObjects, codRutaBuscado }) => {
       <Tooltip title="Pantalla completa">
         <IconButton style={controlStyle(190)} color="primary" onClick={toggleFullscreen}>
           {isFullscreen ? <FullscreenExit /> : <Fullscreen />}
+        </IconButton>
+      </Tooltip>
+
+       <Tooltip title="Info">
+        <IconButton
+          style={controlStyle(250)}
+          color={infoActive ? "secondary" : "primary"}
+          onClick={() => setInfoActive(!infoActive)}
+        >
+          <InfoIcon />
         </IconButton>
       </Tooltip>
     </>

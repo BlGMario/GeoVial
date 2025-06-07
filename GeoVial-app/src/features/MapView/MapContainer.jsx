@@ -9,9 +9,10 @@ import { transformExtent } from 'ol/proj';
 
 import LayerControls from './LayerControls';
 import useMapInit from './useMapInit';
-import PopupInfo from './PopupInfo';
 import Zoom from 'ol/control/Zoom';
 import SearchInput from './SearchInput';
+import { searchByCodRuta } from './SearchHandler'; // si lo necesitas para búsqueda
+import InfoPopup from './InfoPopup'; // lo crearás abajo
 
 
 const MapContainer = () => {
@@ -20,6 +21,8 @@ const MapContainer = () => {
   const [featureInfo, setFeatureInfo] = useState(null);
   const [layerObjects, setLayerObjects] = useState({});
   const [codRutaBuscado, setCodRutaBuscado] = useState(null); // <-- nuevo estado
+  const [infoActive, setInfoActive] = useState(false);
+  const [infoPopup, setInfoPopup] = useState({ open: false, coord: null, data: null });
 
 
   // Crear capa base controlada para cambiarla desde LayerControls
@@ -110,6 +113,65 @@ const MapContainer = () => {
     alert('No se encontró el COD_RUTA en las capas.');
   };
 
+  useEffect(() => {
+    if (!mapInstance) return;
+
+    // Limpia listeners previos SOLO si existe el handler
+    if (mapInstance._infoClickHandler) {
+      mapInstance.un('singleclick', mapInstance._infoClickHandler);
+      mapInstance._infoClickHandler = undefined;
+    }
+
+    if (infoActive) {
+      // Handler para click en el mapa
+      const handler = async (evt) => {
+        // Obtén coordenadas del click
+        const coordinate = evt.coordinate;
+        // Consulta WFS para obtener el COD_RUTA de la geometría bajo el click
+        const layers = [
+          'Jerarquizacion:DS011_2016_RVN_EJES',
+          'Jerarquizacion:DS011_2016_RVD_EJES',
+          'Jerarquizacion:DS011_2016_RVV_EJES'
+        ];
+        let codRuta = null;
+        for (const layer of layers) {
+          const url = `${import.meta.env.VITE_GEOSERVER_API}/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=${layer}&outputFormat=application/json&bbox=${coordinate[0]-0.01},${coordinate[1]-0.01},${coordinate[0]+0.01},${coordinate[1]+0.01},EPSG:3857`;
+          try {
+            const res = await fetch(url);
+            const json = await res.json();
+            if (json.features && json.features.length > 0) {
+              codRuta = json.features[0].properties.COD_RUTA;
+              break;
+            }
+          } catch (e) {}
+        }
+        if (codRuta) {
+          // Llama a tu API para obtener el detalle
+          try {
+            const apiUrl = `/api/detalle-codruta?cod_ruta=${encodeURIComponent(codRuta)}`; // Ajusta la ruta de tu API
+            const res = await fetch(apiUrl);
+            const data = await res.json();
+            setInfoPopup({ open: true, coord: coordinate, data });
+          } catch (e) {
+            setInfoPopup({ open: true, coord: coordinate, data: { error: "No se pudo obtener información." } });
+          }
+        } else {
+          setInfoPopup({ open: true, coord: coordinate, data: { error: "No se encontró COD_RUTA en este punto." } });
+        }
+      };
+      mapInstance.on('singleclick', handler);
+      mapInstance._infoClickHandler = handler;
+    }
+
+    // Limpia al desactivar
+    return () => {
+      if (mapInstance && mapInstance._infoClickHandler) {
+        mapInstance.un('singleclick', mapInstance._infoClickHandler);
+        mapInstance._infoClickHandler = undefined;
+      }
+    };
+  }, [mapInstance, infoActive]);
+
   return (
     <div style={{ height: '100vh', position: 'relative' }}>
       <SearchInput onSearch={handleSearch} />
@@ -118,9 +180,11 @@ const MapContainer = () => {
         map={mapInstance}
         baseLayer={baseLayer}
         layerObjects={layerObjects}
-        codRutaBuscado={codRutaBuscado} // <-- pásalo aquí
+        codRutaBuscado={codRutaBuscado}
+        infoActive={infoActive}
+        setInfoActive={setInfoActive}
       />
-      <PopupInfo map={mapInstance} featureInfo={featureInfo} />
+      <InfoPopup open={infoPopup.open} coord={infoPopup.coord} data={infoPopup.data} onClose={() => setInfoPopup({ open: false, coord: null, data: null })} />
     </div>
   );
 };
