@@ -148,8 +148,9 @@ const MapContainer = () => {
         if (codRuta) {
           // Llama a tu API para obtener el detalle
           try {
-            const apiUrl = `/api/detalle-codruta?cod_ruta=${encodeURIComponent(codRuta)}`; // Ajusta la ruta de tu API
+            const apiUrl = `http://localhost:8000/api/ejes/${encodeURIComponent(codRuta)}`; // Ajusta la ruta de tu API
             const res = await fetch(apiUrl);
+            console.log('Información obtenida:', apiUrl);
             const data = await res.json();
             setInfoPopup({ open: true, coord: coordinate, data });
           } catch (e) {

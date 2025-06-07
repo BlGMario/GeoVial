@@ -3,5 +3,5 @@ from .views import GeoVialEjesList, GeoVialEjesDetail
 
 urlpatterns = [
     path('ejes/', GeoVialEjesList.as_view(), name='ejes-list'),
-    path('ejes/<string:COD_RUTA>/', GeoVialEjesDetail.as_view(), name='eje-detail'),
+    path('ejes/<str:COD_RUTA>/', GeoVialEjesDetail.as_view(), name='eje-detail'),
 ]
