@@ -3,11 +3,11 @@
 import React, { useState } from 'react';
 import { IconButton, Tooltip } from '@mui/material';
 import { Fullscreen, FullscreenExit, Map, Layers, PictureAsPdf } from '@mui/icons-material';
-import { generatePdfUrl, getLayersForPrinting, calculateBoundingBox } from './PdfExport';
+import { getExportUrlMap } from './GeoFetchDataUtil';
 import BaseMapSwitcher from './BaseMapSwitcher'; 
 import LayerTogglePanel from './LayerTogglePanel';
 
-const LayerControls = ({ map, baseLayer,layerObjects }) => {
+const LayerControls = ({ map, baseLayer, layerObjects, codRutaBuscado }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleFullscreen = () => {
@@ -22,31 +22,18 @@ const LayerControls = ({ map, baseLayer,layerObjects }) => {
     }
   };
 
-  const handlePdfExport = () => {
-    if (!map) return;
-
-    const features = map.getLayers()
-      .getArray()
-      .filter(l => l.getSource && l.getSource().getFeatures)
-      .flatMap(l => l.getSource().getFeatures())
-      .filter(f => f.getGeometry && f.getGeometry().getType() === 'MultiLineString');
-
-    if (features.length === 0) {
-      alert("No hay una geometría válida seleccionada.");
+  const handlePdfExport = async () => {
+    if (!codRutaBuscado) {
+      alert("Primero realiza una búsqueda de COD_RUTA.");
       return;
     }
-
-    const feature = features[0];
-    const geometry = feature.getGeometry().getCoordinates();
-    const codRuta = feature.get('COD_RUTA') || 'N/A';
-    const tipo = feature.get('tipo') || 'N/A';
-    const capa = feature.getId()?.split('.')[0] || 'DS011_2016_RVN_EJES';
-
-    const bbox = calculateBoundingBox(geometry);
-    const layerData = getLayersForPrinting(`Jerarquizacion:${capa}`, tipo, codRuta);
-    const pdfUrl = generatePdfUrl(bbox, layerData);
-
-    window.open(pdfUrl, '_blank');
+    try {
+      // Usa la utilidad centralizada
+      const pdfUrl = await getExportUrlMap(codRutaBuscado, 'application/pdf');
+      window.open(pdfUrl, '_blank');
+    } catch (e) {
+      alert("No se pudo generar el PDF para el COD_RUTA buscado.");
+    }
   };
 
   return (
